@@ -53,7 +53,7 @@ export default function ProfilePage() {
     setAvatarLoading(true);
     try {
       const fd = new FormData();
-      fd.append('avatar', file);
+      fd.append('image', file);
       const updated = await apiUploadAvatar(fd);
       updateUser(updated);
       toast.success('Avatar updated!');

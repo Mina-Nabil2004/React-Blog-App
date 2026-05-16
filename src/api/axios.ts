@@ -7,10 +7,17 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ── Request: attach access token ────────────────────────────────────────────
+// ── Request: attach access token + fix Content-Type for FormData ────────────
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('blog_access_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
+
+  // When sending FormData let the browser set Content-Type with the multipart
+  // boundary automatically — our default 'application/json' would break multer.
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
   return config;
 });
 
