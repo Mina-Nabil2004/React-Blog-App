@@ -96,7 +96,7 @@ export default function BlogCard({
         {showActions && (
           <div
             onClick={(e) => e.stopPropagation()}
-            className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-surface-border pt-4"
+            className="mt-4 flex items-center justify-between gap-2 border-t border-surface-border pt-4"
           >
             <div className="flex items-center gap-2">
               <Link
