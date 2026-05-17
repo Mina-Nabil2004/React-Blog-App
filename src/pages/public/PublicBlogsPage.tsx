@@ -26,7 +26,7 @@ export default function PublicBlogsPage() {
     (b) =>
       b.title.toLowerCase().includes(search.toLowerCase()) ||
       b.author.name.toLowerCase().includes(search.toLowerCase()) ||
-      b.tags.some((t) => t.name.toLowerCase().includes(search.toLowerCase())),
+      (b.tags ?? []).some((t) => t.name.toLowerCase().includes(search.toLowerCase())),
   );
 
   return (
