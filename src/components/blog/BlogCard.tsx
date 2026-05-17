@@ -5,6 +5,7 @@ import { resolveImageUrl } from '../../utils/imageUrl';
 import { formatDate } from '../../utils/formatDate';
 import BlogStatusBadge from './BlogStatusBadge';
 import TagBadge from './TagBadge';
+import Avatar from '../ui/Avatar';
 import { useAuth } from '../../hooks/useAuth';
 
 interface Props {
@@ -83,9 +84,7 @@ export default function BlogCard({
             onClick={(e) => stopAndNavigate(e, `/users/${blog.author.userID}`)}
             className="flex items-center gap-2 group/author"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-600">
-              {blog.author.name.charAt(0).toUpperCase()}
-            </div>
+            <Avatar name={blog.author.name} avatarUrl={blog.author.avatarUrl} size="xs" />
             <span className="text-xs text-content-secondary group-hover/author:text-primary-600 transition-colors">
               {blog.author.name}
             </span>
@@ -97,44 +96,46 @@ export default function BlogCard({
         {showActions && (
           <div
             onClick={(e) => e.stopPropagation()}
-            className="mt-4 flex flex-wrap items-center gap-2 border-t border-surface-border pt-4"
+            className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-surface-border pt-4"
           >
-            <Link
-              to={`/blogs/${blog.blogID}/edit`}
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-primary-50 hover:text-primary-600 transition-colors"
-            >
-              <Pencil size={12} /> Edit
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/blogs/${blog.blogID}/edit`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-primary-50 hover:text-primary-600 transition-colors"
+              >
+                <Pencil size={12} /> Edit
+              </Link>
 
-            {blog.published ? (
-              <button
-                onClick={() => onUnpublish?.(blog)}
-                className="inline-flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-warning-500/10 hover:text-warning-500 transition-colors"
-              >
-                <EyeOff size={12} /> Unpublish
-              </button>
-            ) : (
-              <button
-                onClick={() => onPublish?.(blog)}
-                className="inline-flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-success-500/10 hover:text-success-500 transition-colors"
-              >
-                <Eye size={12} /> Publish
-              </button>
-            )}
+              {blog.published ? (
+                <button
+                  onClick={() => onUnpublish?.(blog)}
+                  className="inline-flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-warning-500/10 hover:text-warning-500 transition-colors"
+                >
+                  <EyeOff size={12} /> Unpublish
+                </button>
+              ) : (
+                <button
+                  onClick={() => onPublish?.(blog)}
+                  className="inline-flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-success-500/10 hover:text-success-500 transition-colors"
+                >
+                  <Eye size={12} /> Publish
+                </button>
+              )}
 
-            {user?.role === 'ADMIN' && blog.published && !blog.approved && (
-              <button
-                onClick={() => onApprove?.(blog)}
-                className="inline-flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-success-500/10 hover:text-success-500 transition-colors"
-              >
-                <CheckCircle size={12} /> Approve
-              </button>
-            )}
+              {user?.role === 'ADMIN' && blog.published && !blog.approved && (
+                <button
+                  onClick={() => onApprove?.(blog)}
+                  className="inline-flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-success-500/10 hover:text-success-500 transition-colors"
+                >
+                  <CheckCircle size={12} /> Approve
+                </button>
+              )}
+            </div>
 
             <button
               onClick={() => onDelete?.(blog)}
-              className="ml-auto inline-flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-danger-500/10 hover:text-danger-500 transition-colors"
+              className="inline-flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-danger-500/10 hover:text-danger-500 transition-colors"
             >
               <Trash2 size={12} /> Delete
             </button>
