@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { PenSquare } from 'lucide-react';
+import { PenSquare, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   apiGetBlogsByAuthor,
+  apiGetAllBlogs,
   apiDeleteBlog,
   apiPublishBlog,
   apiUnpublishBlog,
@@ -14,6 +15,9 @@ import { useAuth } from '../../hooks/useAuth';
 import BlogGrid from '../../components/blog/BlogGrid';
 import ConfirmModal from '../../components/ui/ConfirmModal';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { formatDate } from '../../utils/formatDate';
+import { resolveImageUrl } from '../../utils/imageUrl';
+import { Link as RouterLink } from 'react-router-dom';
 
 type Filter = 'all' | 'published' | 'draft' | 'pending';
 
@@ -26,20 +30,40 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
+
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>('all');
   const [blogToDelete, setBlogToDelete] = useState<Blog | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Admin: all system blogs pending approval
+  const [pendingBlogs, setPendingBlogs] = useState<Blog[]>([]);
+  const [pendingLoading, setPendingLoading] = useState(false);
+
   useEffect(() => {
     document.title = 'Dashboard — BlogApp';
     if (!user) return;
+
+    // Fetch author's own blogs
     apiGetBlogsByAuthor(user.userID)
       .then((data) => setBlogs(Array.isArray(data) ? data : []))
       .catch(() => toast.error('Failed to load your blogs'))
       .finally(() => setLoading(false));
-  }, [user]);
+
+    // Fetch all pending approval blogs for admin
+    if (isAdmin) {
+      setPendingLoading(true);
+      apiGetAllBlogs()
+        .then((data) => {
+          const all = Array.isArray(data) ? data : [];
+          setPendingBlogs(all.filter((b) => b.published && !b.approved));
+        })
+        .catch(() => toast.error('Failed to load pending blogs'))
+        .finally(() => setPendingLoading(false));
+    }
+  }, [user, isAdmin]);
 
   const filtered = useMemo(() => {
     switch (filter) {
@@ -95,8 +119,11 @@ export default function DashboardPage() {
   const handleApprove = async (blog: Blog) => {
     try {
       const updated = await apiApproveBlog(blog.blogID);
+      // Remove from pending list
+      setPendingBlogs((prev) => prev.filter((b) => b.blogID !== updated.blogID));
+      // Update own blogs list if it's there
       setBlogs((prev) => prev.map((b) => (b.blogID === updated.blogID ? updated : b)));
-      toast.success('Blog approved');
+      toast.success('Blog approved and live!');
     } catch {
       toast.error('Failed to approve blog');
     }
@@ -106,7 +133,79 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      {/* Header */}
+
+      {/* ── Admin Approval Section ─────────────────────────────────── */}
+      {isAdmin && (
+        <div className="mb-10">
+          <div className="mb-4 flex items-center gap-2">
+            <ShieldCheck size={18} className="text-primary-600" />
+            <h2 className="text-lg font-bold text-content-primary">Pending Approval</h2>
+            {pendingBlogs.length > 0 && (
+              <span className="rounded-full bg-warning-500/10 px-2.5 py-0.5 text-xs font-semibold text-warning-500">
+                {pendingBlogs.length} waiting
+              </span>
+            )}
+          </div>
+
+          {pendingLoading ? (
+            <div className="flex justify-center py-8"><LoadingSpinner /></div>
+          ) : pendingBlogs.length === 0 ? (
+            <div className="rounded-2xl border border-surface-border bg-white px-6 py-8 text-center">
+              <p className="text-sm text-content-secondary">All caught up — no blogs waiting for approval.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {pendingBlogs.map((blog) => (
+                <div
+                  key={blog.blogID}
+                  className="flex items-center gap-4 rounded-2xl border border-surface-border bg-white p-4 hover:shadow-sm transition-shadow"
+                >
+                  {/* Thumbnail */}
+                  <div className="h-14 w-20 shrink-0 overflow-hidden rounded-xl bg-surface-muted">
+                    {resolveImageUrl(blog.imageUrl) ? (
+                      <img
+                        src={resolveImageUrl(blog.imageUrl)!}
+                        alt={blog.title}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xl font-bold text-primary-200">
+                        {blog.title.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <RouterLink
+                      to={`/blogs/${blog.blogID}`}
+                      className="truncate text-sm font-semibold text-content-primary hover:text-primary-600 transition-colors"
+                    >
+                      {blog.title}
+                    </RouterLink>
+                    <p className="mt-0.5 text-xs text-content-tertiary">
+                      by <span className="font-medium text-content-secondary">{blog.author.name}</span>
+                      {' · '}{formatDate(blog.createdAt)}
+                    </p>
+                  </div>
+
+                  {/* Approve button */}
+                  <button
+                    onClick={() => handleApprove(blog)}
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-success-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 transition-colors"
+                  >
+                    <ShieldCheck size={14} /> Approve
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <hr className="mt-8 border-surface-border" />
+        </div>
+      )}
+
+      {/* ── My Blogs Header ────────────────────────────────────────── */}
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-content-primary">My Blogs</h1>

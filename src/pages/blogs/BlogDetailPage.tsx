@@ -120,12 +120,12 @@ export default function BlogDetailPage() {
         )}
       </div>
 
-      {/* Content */}
+      {/* Content — visible to everyone */}
       <div className="font-serif text-lg leading-8 text-content-primary whitespace-pre-wrap">
         {blog.content}
       </div>
 
-      {/* Comments */}
+      {/* Comments — gated for guests inside CommentList */}
       <CommentList blogId={blog.blogID} />
 
       <ConfirmModal

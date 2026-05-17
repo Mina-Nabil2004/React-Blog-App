@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Send } from 'lucide-react';
+import { Send, MessageSquare, LogIn } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import type { Comment } from '../../types';
 import { apiGetBlogComments, apiCreateComment } from '../../api/comments';
@@ -70,9 +71,29 @@ export default function CommentList({ blogId }: Props) {
           </div>
         </form>
       ) : (
-        <p className="mb-8 rounded-xl border border-surface-border bg-surface-muted px-4 py-3 text-sm text-content-secondary">
-          <a href="/login" className="font-medium text-primary-600 hover:underline">Log in</a> to leave a comment.
-        </p>
+        <div className="mb-8 rounded-2xl border border-surface-border bg-gradient-to-br from-primary-50/60 to-white px-6 py-6">
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary-100">
+            <MessageSquare size={18} className="text-primary-500" />
+          </div>
+          <h3 className="mb-1 text-sm font-semibold text-content-primary">Join the conversation</h3>
+          <p className="mb-4 text-xs text-content-secondary leading-relaxed">
+            Sign in to share your thoughts and engage with the community.
+          </p>
+          <div className="flex gap-2">
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-primary-500 px-4 py-2 text-xs font-medium text-white hover:bg-primary-600 transition-colors"
+            >
+              <LogIn size={13} /> Log in
+            </Link>
+            <Link
+              to="/signup"
+              className="inline-flex items-center rounded-xl border border-surface-border bg-white px-4 py-2 text-xs font-medium text-content-secondary hover:bg-surface-muted transition-colors"
+            >
+              Sign up free
+            </Link>
+          </div>
+        </div>
       )}
 
       {/* Comment list */}
