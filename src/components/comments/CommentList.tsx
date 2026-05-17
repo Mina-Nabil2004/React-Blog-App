@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Send, MessageSquare, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Avatar from '../ui/Avatar';
 import toast from 'react-hot-toast';
 import type { Comment } from '../../types';
 import { apiGetBlogComments, apiCreateComment } from '../../api/comments';
@@ -50,9 +51,7 @@ export default function CommentList({ blogId }: Props) {
       {/* Add comment */}
       {isAuthenticated ? (
         <form onSubmit={handleSubmit} className="mb-8 flex gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-600">
-            {user?.name.charAt(0).toUpperCase()}
-          </div>
+          <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} size="sm" />
           <div className="flex flex-1 items-end gap-2">
             <textarea
               value={newComment}

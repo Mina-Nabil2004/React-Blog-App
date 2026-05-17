@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { PenSquare, LogOut, User, LayoutDashboard, BookOpen, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import Avatar from '../ui/Avatar';
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -52,9 +53,7 @@ export default function Navbar() {
                     onClick={() => setDropdownOpen((p) => !p)}
                     className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-content-secondary hover:bg-surface-muted transition-colors"
                   >
-                    <div className="h-7 w-7 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-semibold text-xs">
-                      {user?.name.charAt(0).toUpperCase()}
-                    </div>
+                    <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} size="xs" />
                     <span className="font-medium text-content-primary">{user?.name}</span>
                   </button>
                   {dropdownOpen && (

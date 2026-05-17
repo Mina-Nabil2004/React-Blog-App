@@ -8,6 +8,7 @@ import { resolveImageUrl } from '../../utils/imageUrl';
 import { formatDate } from '../../utils/formatDate';
 import { useAuth } from '../../hooks/useAuth';
 import TagBadge from '../../components/blog/TagBadge';
+import Avatar from '../../components/ui/Avatar';
 import CommentList from '../../components/comments/CommentList';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import ConfirmModal from '../../components/ui/ConfirmModal';
@@ -91,9 +92,7 @@ export default function BlogDetailPage() {
           to={`/users/${blog.author.userID}`}
           className="flex items-center gap-3 group"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-600 group-hover:bg-primary-200 transition-colors">
-            {blog.author.name.charAt(0).toUpperCase()}
-          </div>
+          <Avatar name={blog.author.name} avatarUrl={blog.author.avatarUrl} size="md" />
           <div>
             <div className="text-sm font-medium text-content-primary group-hover:text-primary-600 transition-colors">
               {blog.author.name}

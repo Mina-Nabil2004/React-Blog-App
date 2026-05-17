@@ -4,6 +4,7 @@ import type { Comment } from '../../types';
 import { useAuth } from '../../hooks/useAuth';
 import { formatRelative } from '../../utils/formatDate';
 import { apiUpdateComment, apiDeleteComment } from '../../api/comments';
+import Avatar from '../ui/Avatar';
 import toast from 'react-hot-toast';
 
 interface Props {
@@ -48,10 +49,7 @@ export default function CommentItem({ comment, onUpdated, onDeleted }: Props) {
 
   return (
     <div className="flex gap-3">
-      {/* Avatar */}
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-600">
-        {comment.author.name.charAt(0).toUpperCase()}
-      </div>
+      <Avatar name={comment.author.name} avatarUrl={comment.author.avatarUrl} size="sm" />
 
       <div className="flex-1">
         <div className="flex items-center gap-2">
