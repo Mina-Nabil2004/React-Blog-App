@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Pencil, Trash2, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import type { Blog } from '../../types';
 import { resolveImageUrl } from '../../utils/imageUrl';
@@ -25,28 +25,37 @@ export default function BlogCard({
   onApprove,
 }: Props) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const imageUrl = resolveImageUrl(blog.imageUrl);
 
+  const goToBlog = () => navigate(`/blogs/${blog.blogID}`);
+
+  const stopAndNavigate = (e: React.MouseEvent, to: string) => {
+    e.stopPropagation();
+    navigate(to);
+  };
+
   return (
-    <div className="group flex flex-col rounded-2xl bg-white border border-surface-border shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+    <div
+      onClick={goToBlog}
+      className="group flex flex-col rounded-2xl bg-white border border-surface-border shadow-sm hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
+    >
       {/* Cover image */}
-      <Link to={`/blogs/${blog.blogID}`}>
-        <div className="aspect-video w-full overflow-hidden bg-surface-muted">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={blog.title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
-              <span className="text-4xl font-bold text-primary-200">
-                {blog.title.charAt(0).toUpperCase()}
-              </span>
-            </div>
-          )}
-        </div>
-      </Link>
+      <div className="aspect-video w-full overflow-hidden bg-surface-muted">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={blog.title}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
+            <span className="text-4xl font-bold text-primary-200">
+              {blog.title.charAt(0).toUpperCase()}
+            </span>
+          </div>
+        )}
+      </div>
 
       {/* Body */}
       <div className="flex flex-1 flex-col p-5">
@@ -59,11 +68,9 @@ export default function BlogCard({
         </div>
 
         {/* Title */}
-        <Link to={`/blogs/${blog.blogID}`}>
-          <h3 className="mb-2 line-clamp-2 text-base font-semibold text-content-primary hover:text-primary-600 transition-colors">
-            {blog.title}
-          </h3>
-        </Link>
+        <h3 className="mb-2 line-clamp-2 text-base font-semibold text-content-primary group-hover:text-primary-600 transition-colors">
+          {blog.title}
+        </h3>
 
         {/* Excerpt */}
         <p className="mb-4 line-clamp-3 flex-1 text-sm text-content-secondary leading-relaxed">
@@ -72,20 +79,29 @@ export default function BlogCard({
 
         {/* Author + date */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <button
+            onClick={(e) => stopAndNavigate(e, `/users/${blog.author.userID}`)}
+            className="flex items-center gap-2 group/author"
+          >
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-600">
               {blog.author.name.charAt(0).toUpperCase()}
             </div>
-            <span className="text-xs text-content-secondary">{blog.author.name}</span>
-          </div>
+            <span className="text-xs text-content-secondary group-hover/author:text-primary-600 transition-colors">
+              {blog.author.name}
+            </span>
+          </button>
           <span className="text-xs text-content-tertiary">{formatDate(blog.createdAt)}</span>
         </div>
 
         {/* Dashboard actions */}
         {showActions && (
-          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-surface-border pt-4">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="mt-4 flex flex-wrap items-center gap-2 border-t border-surface-border pt-4"
+          >
             <Link
               to={`/blogs/${blog.blogID}/edit`}
+              onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-primary-50 hover:text-primary-600 transition-colors"
             >
               <Pencil size={12} /> Edit

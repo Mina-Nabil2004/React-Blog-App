@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2, Calendar, User } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiGetBlogById, apiDeleteBlog } from '../../api/blogs';
 import type { Blog } from '../../types';
@@ -87,19 +87,22 @@ export default function BlogDetailPage() {
 
       {/* Meta */}
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-surface-border pb-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-600">
+        <Link
+          to={`/users/${blog.author.userID}`}
+          className="flex items-center gap-3 group"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-600 group-hover:bg-primary-200 transition-colors">
             {blog.author.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <div className="flex items-center gap-1.5 text-sm font-medium text-content-primary">
-              <User size={13} /> {blog.author.name}
+            <div className="text-sm font-medium text-content-primary group-hover:text-primary-600 transition-colors">
+              {blog.author.name}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-content-tertiary">
               <Calendar size={11} /> {formatDate(blog.createdAt)}
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Author actions */}
         {isAuthor && (

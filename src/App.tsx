@@ -18,6 +18,7 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import CreateBlogPage from './pages/blogs/CreateBlogPage';
 import EditBlogPage from './pages/blogs/EditBlogPage';
 import ProfilePage from './pages/profile/ProfilePage';
+import PublicProfilePage from './pages/profile/PublicProfilePage';
 
 function NotFound() {
   return (
@@ -48,6 +49,9 @@ export default function App() {
             <Route path="/blogs/new" element={<ProtectedRoute><CreateBlogPage /></ProtectedRoute>} />
             <Route path="/blogs/:id" element={<BlogDetailPage />} />
             <Route path="/blogs/:id/edit" element={<ProtectedRoute><EditBlogPage /></ProtectedRoute>} />
+
+            {/* Public profile */}
+            <Route path="/users/:id" element={<PublicProfilePage />} />
 
             {/* Protected */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
