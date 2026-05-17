@@ -17,7 +17,7 @@ export default function PublicBlogsPage() {
   useEffect(() => {
     document.title = 'Explore Blogs — BlogApp';
     apiGetPublishedBlogs()
-      .then(setBlogs)
+      .then((data) => setBlogs(Array.isArray(data) ? data : []))
       .catch(() => toast.error('Failed to load blogs'))
       .finally(() => setLoading(false));
   }, []);

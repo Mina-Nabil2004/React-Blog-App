@@ -20,7 +20,7 @@ export default function CommentList({ blogId }: Props) {
 
   useEffect(() => {
     apiGetBlogComments(blogId)
-      .then(setComments)
+      .then((data) => setComments(Array.isArray(data) ? data : []))
       .catch(() => toast.error('Failed to load comments'))
       .finally(() => setLoading(false));
   }, [blogId]);

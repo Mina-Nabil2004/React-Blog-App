@@ -36,7 +36,7 @@ export default function DashboardPage() {
     document.title = 'Dashboard — BlogApp';
     if (!user) return;
     apiGetBlogsByAuthor(user.userID)
-      .then(setBlogs)
+      .then((data) => setBlogs(Array.isArray(data) ? data : []))
       .catch(() => toast.error('Failed to load your blogs'))
       .finally(() => setLoading(false));
   }, [user]);

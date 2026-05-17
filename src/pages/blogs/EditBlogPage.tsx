@@ -40,8 +40,8 @@ export default function EditBlogPage() {
     Promise.all([apiGetBlogById(id), apiGetTags()])
       .then(([b, tags]) => {
         setBlog(b);
-        setAllTags(tags);
-        setSelectedTags(b.tags);
+        setAllTags(Array.isArray(tags) ? tags : []);
+        setSelectedTags(Array.isArray(b.tags) ? b.tags : []);
         reset({ title: b.title, content: b.content, published: b.published });
         document.title = `Edit: ${b.title} — BlogApp`;
       })

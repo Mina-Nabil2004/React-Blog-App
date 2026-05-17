@@ -24,7 +24,7 @@ export default function CreateBlogPage() {
 
   useEffect(() => {
     document.title = 'New Blog — BlogApp';
-    apiGetTags().then(setAllTags).catch(() => {});
+    apiGetTags().then((data) => setAllTags(Array.isArray(data) ? data : [])).catch(() => {});
   }, []);
 
   const {

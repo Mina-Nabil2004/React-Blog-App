@@ -53,7 +53,7 @@ export default function BlogCard({
         {/* Status + tags */}
         <div className="mb-3 flex flex-wrap items-center gap-2">
           {showActions && <BlogStatusBadge published={blog.published} approved={blog.approved} />}
-          {blog.tags.slice(0, 2).map((t) => (
+          {(blog.tags ?? []).slice(0, 2).map((t) => (
             <TagBadge key={t.tagID} name={t.name} />
           ))}
         </div>
