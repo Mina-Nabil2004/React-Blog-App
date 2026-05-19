@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { PenSquare, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
+import { PenSquare, ShieldCheck, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   apiGetBlogsByAuthor,
@@ -49,7 +49,10 @@ export default function DashboardPage() {
 
     // Fetch author's own blogs
     apiGetBlogsByAuthor(user.userID)
-      .then((data) => setBlogs(Array.isArray(data) ? data : []))
+      .then((data) => {
+        const arr = Array.isArray(data) ? data : [];
+        setBlogs(arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+      })
       .catch(() => toast.error('Failed to load your blogs'))
       .finally(() => setLoading(false));
 
@@ -59,7 +62,11 @@ export default function DashboardPage() {
       apiGetAllBlogs()
         .then((data) => {
           const all = Array.isArray(data) ? data : [];
-          setPendingBlogs(all.filter((b) => b.published && !b.approved));
+          setPendingBlogs(
+            all
+              .filter((b) => b.published && !b.approved)
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          );
         })
         .catch(() => toast.error('Failed to load pending blogs'))
         .finally(() => setPendingLoading(false));
@@ -88,6 +95,7 @@ export default function DashboardPage() {
     try {
       await apiDeleteBlog(blogToDelete.blogID);
       setBlogs((prev) => prev.filter((b) => b.blogID !== blogToDelete.blogID));
+      setPendingBlogs((prev) => prev.filter((b) => b.blogID !== blogToDelete.blogID));
       toast.success('Blog deleted');
     } catch {
       toast.error('Failed to delete blog');
@@ -111,6 +119,7 @@ export default function DashboardPage() {
     try {
       const updated = await apiUnpublishBlog(blog.blogID);
       setBlogs((prev) => prev.map((b) => (b.blogID === updated.blogID ? updated : b)));
+      setPendingBlogs((prev) => prev.filter((b) => b.blogID !== updated.blogID));
       toast.success('Blog moved back to draft');
     } catch {
       toast.error('Failed to unpublish blog');
@@ -198,13 +207,21 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Approve button — full width on mobile, auto on desktop */}
-                    <button
-                      onClick={() => handleApprove(blog)}
-                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-success-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 transition-colors sm:w-auto sm:shrink-0"
-                    >
-                      <ShieldCheck size={14} /> Approve
-                    </button>
+                    {/* Actions */}
+                    <div className="flex w-full gap-2 sm:w-auto sm:shrink-0">
+                      <button
+                        onClick={() => handleApprove(blog)}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-success-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-600 transition-colors sm:flex-none"
+                      >
+                        <ShieldCheck size={14} /> Approve
+                      </button>
+                      <button
+                        onClick={() => setBlogToDelete(blog)}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-danger-500/30 bg-white px-3 py-2 text-sm font-medium text-danger-500 hover:bg-danger-500/5 transition-colors sm:flex-none"
+                      >
+                        <Trash2 size={14} /> Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2, Calendar } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2, Calendar, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { apiGetBlogById, apiDeleteBlog } from '../../api/blogs';
+import { apiGetBlogById, apiDeleteBlog, apiUnpublishBlog } from '../../api/blogs';
 import type { Blog } from '../../types';
 import { resolveImageUrl } from '../../utils/imageUrl';
 import { formatDate } from '../../utils/formatDate';
@@ -17,10 +17,12 @@ export default function BlogDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [unpublishing, setUnpublishing] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -51,10 +53,25 @@ export default function BlogDetailPage() {
     }
   };
 
+  const handleUnpublish = async () => {
+    if (!blog) return;
+    setUnpublishing(true);
+    try {
+      await apiUnpublishBlog(blog.blogID);
+      toast.success('Blog moved back to draft');
+      navigate('/dashboard', { replace: true });
+    } catch {
+      toast.error('Failed to unpublish blog');
+    } finally {
+      setUnpublishing(false);
+    }
+  };
+
   if (loading) return <LoadingSpinner size="lg" fullPage />;
   if (!blog) return null;
 
   const isAuthor = user?.userID === blog.author.userID;
+  const canModerate = isAuthor || isAdmin;
   const imageUrl = resolveImageUrl(blog.imageUrl);
 
   return (
@@ -103,15 +120,26 @@ export default function BlogDetailPage() {
           </div>
         </Link>
 
-        {/* Author actions */}
-        {isAuthor && (
-          <div className="flex items-center gap-2">
-            <Link
-              to={`/blogs/${blog.blogID}/edit`}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-surface-border bg-white px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-muted transition-colors"
-            >
-              <Pencil size={13} /> Edit
-            </Link>
+        {/* Author / admin actions */}
+        {canModerate && (
+          <div className="flex flex-wrap items-center gap-2">
+            {isAuthor && (
+              <Link
+                to={`/blogs/${blog.blogID}/edit`}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-surface-border bg-white px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-muted transition-colors"
+              >
+                <Pencil size={13} /> Edit
+              </Link>
+            )}
+            {isAdmin && blog.published && (
+              <button
+                onClick={handleUnpublish}
+                disabled={unpublishing}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-warning-500/30 bg-white px-3 py-1.5 text-sm font-medium text-warning-500 hover:bg-warning-500/5 transition-colors disabled:opacity-50"
+              >
+                <EyeOff size={13} /> {unpublishing ? 'Unpublishing…' : 'Unpublish'}
+              </button>
+            )}
             <button
               onClick={() => setConfirmDelete(true)}
               className="inline-flex items-center gap-1.5 rounded-xl border border-danger-500/30 bg-white px-3 py-1.5 text-sm font-medium text-danger-500 hover:bg-danger-500/5 transition-colors"
@@ -123,7 +151,7 @@ export default function BlogDetailPage() {
       </div>
 
       {/* Content — visible to everyone */}
-      <div className="font-serif text-lg leading-8 text-content-primary whitespace-pre-wrap">
+      <div className="font-serif text-lg leading-8 text-content-primary whitespace-pre-wrap break-words overflow-hidden">
         {blog.content}
       </div>
 

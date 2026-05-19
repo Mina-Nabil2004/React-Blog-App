@@ -16,6 +16,8 @@ interface Props {
 export default function CommentItem({ comment, onUpdated, onDeleted }: Props) {
   const { user } = useAuth();
   const isOwner = user?.userID === comment.author.userID;
+  const isAdmin = user?.role === 'ADMIN';
+  const canDelete = isOwner || isAdmin;
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(comment.content);
   const [saving, setSaving] = useState(false);
@@ -51,7 +53,7 @@ export default function CommentItem({ comment, onUpdated, onDeleted }: Props) {
     <div className="flex gap-3">
       <Avatar name={comment.author.name} avatarUrl={comment.author.avatarUrl} size="sm" />
 
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-content-primary">{comment.author.name}</span>
           <span className="text-xs text-content-tertiary">{formatRelative(comment.createdAt)}</span>
@@ -82,24 +84,28 @@ export default function CommentItem({ comment, onUpdated, onDeleted }: Props) {
             </div>
           </div>
         ) : (
-          <p className="mt-1 text-sm text-content-secondary leading-relaxed">{comment.content}</p>
+          <p className="mt-1 text-sm text-content-secondary leading-relaxed break-words overflow-hidden">{comment.content}</p>
         )}
 
-        {isOwner && !editing && (
+        {(isOwner || canDelete) && !editing && (
           <div className="mt-1.5 flex gap-3">
-            <button
-              onClick={() => setEditing(true)}
-              className="flex items-center gap-1 text-xs text-content-tertiary hover:text-primary-600 transition-colors"
-            >
-              <Pencil size={11} /> Edit
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="flex items-center gap-1 text-xs text-content-tertiary hover:text-danger-500 transition-colors disabled:opacity-60"
-            >
-              <Trash2 size={11} /> {deleting ? 'Deleting…' : 'Delete'}
-            </button>
+            {isOwner && (
+              <button
+                onClick={() => setEditing(true)}
+                className="flex items-center gap-1 text-xs text-content-tertiary hover:text-primary-600 transition-colors"
+              >
+                <Pencil size={11} /> Edit
+              </button>
+            )}
+            {canDelete && (
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex items-center gap-1 text-xs text-content-tertiary hover:text-danger-500 transition-colors disabled:opacity-60"
+              >
+                <Trash2 size={11} /> {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            )}
           </div>
         )}
       </div>

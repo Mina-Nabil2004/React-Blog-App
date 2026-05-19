@@ -23,7 +23,11 @@ export default function PublicProfilePage() {
         setAuthor(user);
         document.title = `${user.name} — BlogApp`;
         const all = Array.isArray(data) ? data : [];
-        setBlogs(all.filter((b) => b.published && b.approved === true));
+        setBlogs(
+          all
+            .filter((b) => b.published && b.approved === true)
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        );
       })
       .catch(() => toast.error('Failed to load profile'))
       .finally(() => setLoading(false));
